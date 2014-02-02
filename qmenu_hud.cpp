@@ -1,6 +1,11 @@
 #include <QApplication>
 #include <QtDebug>
 
+#ifndef NDEBUG
+#include <QFile>
+#include <QTextStream>
+#endif
+
 // generated
 #include "app_menu.h"
 #include "dbus_menu.h"
@@ -11,6 +16,32 @@ typedef com::canonical::dbusmenu DBusMenu;
 #define REGISTRAR_PATH "/com/canonical/AppMenu/Registrar"
 
 #include <X11/Xlib.h>
+
+
+#ifndef NDEBUG
+void file_logger(QtMsgType type, const char *msg){
+	QString txt;
+	switch (type) {
+		case QtDebugMsg:
+			txt = QString("Debug: %1").arg(msg);
+			break;
+		case QtWarningMsg:
+			txt = QString("Warning: %1").arg(msg);
+			break;
+		case QtCriticalMsg:
+			txt = QString("Critical: %1").arg(msg);
+			break;
+		case QtFatalMsg:
+			txt = QString("Fatal: %1").arg(msg);
+			abort();
+	}
+
+	QFile outFile("/tmp/qmenu_hud.log");
+	outFile.open(QIODevice::WriteOnly | QIODevice::Append);
+	QTextStream ts(&outFile);
+	ts << txt << endl;
+}
+#endif
 
 
 void inspect(const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int> &menuMap){
@@ -33,6 +64,9 @@ void inspect(const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int>
 
 int main(int argc, char **argv){
 	QApplication app(argc, argv);
+#ifndef NDEBUG
+	qInstallMsgHandler(file_logger);
+#endif
 
 	// get window (id) which has currently the focus
 	Display *display = XOpenDisplay(NULL);
@@ -50,8 +84,7 @@ int main(int argc, char **argv){
 
 	// get dbus service of the application which exports menu
 	AppMenu *appMenu = new AppMenu(REGISTRAR_SERVICE, REGISTRAR_PATH, QDBusConnection::sessionBus(), 0);
-	QDBusPendingReply<QString, QDBusObjectPath> reply =
-			appMenu->GetMenuForWindow(window);
+	QDBusPendingReply<QString, QDBusObjectPath> reply = appMenu->GetMenuForWindow(window);
 	reply.waitForFinished();
 	if (reply.isError()) {
 		qDebug() << reply.error().name();
