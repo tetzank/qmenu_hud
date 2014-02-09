@@ -1,3 +1,5 @@
+#include <cstdlib> // strtol
+
 #include <QApplication>
 #include <QtDebug>
 
@@ -36,7 +38,7 @@ void file_logger(QtMsgType type, const char *msg){
 			abort();
 	}
 
-	QFile outFile("/tmp/qmenu_hud.log");
+	QFile outFile("/tmp/qmenu_hud.log"); //FIXME: don't use hardcoded path
 	outFile.open(QIODevice::WriteOnly | QIODevice::Append);
 	QTextStream ts(&outFile);
 	ts << txt << endl;
@@ -68,23 +70,42 @@ int main(int argc, char **argv){
 	qInstallMsgHandler(file_logger);
 #endif
 
-	// get window (id) which has currently the focus
-	Display *display = XOpenDisplay(NULL);
-	if(!display){
-		perror("XOpenDisplay failed");
-		return -1;
+	unsigned long int winID;
+	if(argc == 2){ //TODO: print usage with -h|--help
+		// got window id as argument
+		errno = 0;
+		if(argv[1][0] == '0' && argv[1][1] == 'x'){
+			// win id in hex
+			winID = strtol(argv[1], NULL, 16);
+		}else{
+			// win id in dec, hopefully
+			winID = strtol(argv[1], NULL, 10);
+		}
+		if(errno != 0){
+			perror("strtol failed");  //FIXME: write into log
+			exit(EXIT_FAILURE);
+		}
+	}else{
+		// get window (id) which has currently the focus
+		Display *display = XOpenDisplay(NULL);
+		if(!display){
+			perror("XOpenDisplay failed");
+			return -1;
+		}
+		Window window;
+		int ret;
+		XGetInputFocus(display, &window, &ret);
+		qDebug() << "winId: " << window;
+		XCloseDisplay(display);
+
+		winID = window;
 	}
-	Window window;
-	int ret;
-	XGetInputFocus(display, &window, &ret);
-	qDebug() << "winId: " << window;
-	XCloseDisplay(display);
 
 	DBusMenuTypes_register();
 
 	// get dbus service of the application which exports menu
 	AppMenu *appMenu = new AppMenu(REGISTRAR_SERVICE, REGISTRAR_PATH, QDBusConnection::sessionBus(), 0);
-	QDBusPendingReply<QString, QDBusObjectPath> reply = appMenu->GetMenuForWindow(window);
+	QDBusPendingReply<QString, QDBusObjectPath> reply = appMenu->GetMenuForWindow(winID);
 	reply.waitForFinished();
 	if (reply.isError()) {
 		qDebug() << reply.error().name();
