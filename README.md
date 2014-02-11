@@ -18,7 +18,7 @@ Dependencies
 Compile
 -------
 
-```shell
+```
 $ mkdir build
 $ cmake ..
 $ make
@@ -44,3 +44,19 @@ https://wiki.archlinux.org/index.php/Kde#Adding_a_Global_Menu_to_the_desktop
 Now all menubars should be hidden and you can press the global shortcut to get
 a searchable list of all menu entries.
 
+If the dbus service isn't autostarting after a reboot, run the following:
+```
+$ dbus-send --type=method_call --print-reply --dest=org.kde.kded /kded org.kde.kded.loadModule string:appmenu
+```
+(kded has to be running)
+
+example .xinitrc:
+```
+kdeinit4 # to start kded
+konsole &
+
+# run registrar dbus service by loading kded module appmenu
+dbus-send --type=method_call --print-reply --dest=org.kde.kded /kded org.kde.kded.loadModule string:appmenu
+
+exec awesome
+```
