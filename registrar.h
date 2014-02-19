@@ -4,10 +4,12 @@
 #include "dbusmenutypes_p.h"
 
 #include <QString>
-#include <QMap>
+#include <QDBusContext>
+
+#include <map>
 
 
-class Registrar: public QObject{
+class Registrar: public QObject, protected QDBusContext{
 	Q_OBJECT
 public:
 	Registrar(QObject *parent=0);
@@ -24,7 +26,7 @@ Q_SIGNALS: // SIGNALS
 	void WindowUnregistered(uint windowId);
 
 private:
-	QMap<uint,std::pair<QString,QDBusObjectPath>> m_map;
+	std::map<uint,std::pair<QString,QDBusObjectPath>> m_map;
 };
 
 #endif
