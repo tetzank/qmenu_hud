@@ -36,7 +36,6 @@ include(${QT_USE_FILE})
 
 # use krunner method, rips code from libdbusmenu-qt
 
-#add_definitions("-DQT_NAMESPACE=qt4")
 set(qmenu_hud_SRCS qmenu_hud.cpp dbusmenutypes_p.cpp dbusmenushortcut_p.cpp)
 
 set(appmenu_xml com.canonical.AppMenu.Registrar.xml)
@@ -53,3 +52,10 @@ add_executable(qmenu_hud ${qmenu_hud_SRCS})
 # -> -Wl,--as-needed takes care of it
 target_link_libraries(qmenu_hud ${DBUSMENUQT_LIBRARIES} ${QT_LIBRARIES} ${X11_LIBRARIES})
 
+
+set(qmenu_registrar_SRCS qmenu_registrar.cpp registrar.cpp
+	dbusmenutypes_p.cpp dbusmenushortcut_p.cpp)
+qt4_add_dbus_adaptor(qmenu_registrar_SRCS ${appmenu_xml} registrar.h Registrar)
+
+add_executable(qmenu_registrar ${qmenu_registrar_SRCS})
+target_link_libraries(qmenu_registrar ${DBUSMENUQT_LIBRARIES} ${QT_LIBRARIES} ${X11_LIBRARIES})
