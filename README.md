@@ -13,6 +13,7 @@ Dependencies
 
 - Qt4
 - libdbusmenu-qt
+- dmenu
 
 
 Compile
@@ -24,16 +25,33 @@ $ cmake ..
 $ make
 ```
 
-There's no install target yet. Just copy it somewhere accesible and add a
-global keyboard shortcut for it.
+Set `CMAKE_INSTALL_PREFIX` in cmake and run `make install` to install it.
 
+Two programs get compiled qmenu_hud and qmenu_registrar. qmenu_registrar is a
+dbus service where other programs which export their menus have to register.
+qmenu_hud shows all menu entries of the focused window in a searchable list
+using dmenu.
 
 Usage
 -----
 
 It was only tested under Awesome WM on Arch Linux with KDE applications. To
-enable it for KDE4 applications, install appmenu-qt and do the following in
-System Settings.
+enable it for KDE4 applications, install appmenu-qt. Set a global keyboard
+shortcut for qmenu_hud. Now you have to start the registrar dbus service. There
+are two ways of doing this: Run qmenu_registrar or use the kded module
+'appmenu'. qmenu_registrar is recommended as the kded module crashes when you
+try to get the menu of a window which isn't exporting its menu.
+
+Just run qmenu_registrar before any gui application when starting up, e.g.
+.xinitrc:
+```
+qmenu_registrar &
+konsole &
+
+exec awesome
+```
+
+To use the kded module 'appmenu' just change some settings in System Settings:
 
 https://wiki.archlinux.org/index.php/Kde#Adding_a_Global_Menu_to_the_desktop
 > To export the menus to your global menu, go to
@@ -41,22 +59,11 @@ https://wiki.archlinux.org/index.php/Kde#Adding_a_Global_Menu_to_the_desktop
 > Now click the fine-tuning tab and use the drop-down list to select *only
 > export* as your menubar style.
 
-Now all menubars should be hidden and you can press the global shortcut to get
-a searchable list of all menu entries.
-
-If the dbus service isn't autostarting after a reboot, run the following:
+You can also start it by hand (kded needs to be running):
 ```
 $ dbus-send --type=method_call --print-reply --dest=org.kde.kded /kded org.kde.kded.loadModule string:appmenu
 ```
-(kded has to be running)
 
-example .xinitrc:
-```
-kdeinit4 # to start kded
-konsole &
+Either way, all menubars should now be hidden and you can press the global
+shortcut to start qmenu_hud and get a searchable list of all menu entries.
 
-# run registrar dbus service by loading kded module appmenu
-dbus-send --type=method_call --print-reply --dest=org.kde.kded /kded org.kde.kded.loadModule string:appmenu
-
-exec awesome
-```
