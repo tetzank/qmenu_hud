@@ -59,3 +59,5 @@ qt4_add_dbus_adaptor(qmenu_registrar_SRCS ${appmenu_xml} registrar.h Registrar)
 
 add_executable(qmenu_registrar ${qmenu_registrar_SRCS})
 target_link_libraries(qmenu_registrar ${DBUSMENUQT_LIBRARIES} ${QT_LIBRARIES} ${X11_LIBRARIES})
+
+install(TARGETS qmenu_hud qmenu_registrar DESTINATION bin)
