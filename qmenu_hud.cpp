@@ -17,6 +17,8 @@ typedef com::canonical::dbusmenu DBusMenu;
 #define REGISTRAR_SERVICE "com.canonical.AppMenu.Registrar"
 #define REGISTRAR_PATH "/com/canonical/AppMenu/Registrar"
 
+#define DMENU_PATH "/usr/bin/dmenu" //FIXME: hardcoded path
+
 #include <X11/Xlib.h>
 
 
@@ -65,7 +67,7 @@ void inspect(const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int>
 }
 
 int main(int argc, char **argv){
-	QApplication app(argc, argv);
+	QCoreApplication app(argc, argv);
 #ifndef NDEBUG
 	qInstallMsgHandler(file_logger);
 #endif
@@ -108,14 +110,29 @@ int main(int argc, char **argv){
 	QDBusPendingReply<QString, QDBusObjectPath> reply = appMenu->GetMenuForWindow(winID);
 	reply.waitForFinished();
 	if (reply.isError()) {
-		qDebug() << reply.error().name();
-		qDebug() << reply.error().message();
-		return -1;
+		delete appMenu;
+		if(reply.error().type() == QDBusError::Failed){
+			// window not registered/unknown to registrar
+			// let the user know by showing it in dmenu
+			QProcess *proc = new QProcess();
+			proc->start(DMENU_PATH, QStringList());
+			proc->waitForStarted();
+			proc->write("no menu entries exported\n");
+			proc->closeWriteChannel();
+			proc->waitForFinished();
+			delete proc;
+			return 0;
+		}else{
+			// something else
+			qDebug() << reply.error().name();
+			qDebug() << reply.error().message();
+			return -1;
+		}
 	}
 
 	QString dbus_service = reply.argumentAt<0>();
 	QString dbus_path = reply.argumentAt<1>().path();
-	qDebug() << "service: " << dbus_service << "; path: " << dbus_path;
+// 	qDebug() << "service: " << dbus_service << "; path: " << dbus_path;
 
 	// get menu
 	DBusMenu *dbusMenu = new DBusMenu(dbus_service, dbus_path, QDBusConnection::sessionBus());
@@ -143,7 +160,7 @@ int main(int argc, char **argv){
 	QStringList args;
 	args << "-i" << "-l" << "20";
 	QProcess *proc = new QProcess();
-	proc->start("/usr/bin/dmenu", args);
+	proc->start(DMENU_PATH, args);
 	proc->waitForStarted();
 
 	// write all entries to dmenu's stdin
@@ -157,13 +174,13 @@ int main(int argc, char **argv){
 	proc->waitForFinished();
 	// read selected entry from dmenu's stdout
 	QString selected = QString::fromLocal8Bit(proc->readAllStandardOutput()).remove("\n");
-	qDebug() << "selected: " << selected;
+// 	qDebug() << "selected: " << selected;
 	proc->close();
 	delete proc;
 
 	if(!selected.isEmpty()){ // empty when canceled with esc
 		int id = menuMap[selected];
-		qDebug() << "id: " << id;
+// 		qDebug() << "id: " << id;
 
 		// send menu click event
 		QDBusVariant empty;
