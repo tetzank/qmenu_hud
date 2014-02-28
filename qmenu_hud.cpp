@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QtDebug>
+#include <QKeySequence>
 
 #ifndef NDEBUG
 #include <QFile>
@@ -20,6 +21,8 @@ typedef com::canonical::dbusmenu DBusMenu;
 #define DMENU_PATH "/usr/bin/dmenu" //FIXME: hardcoded path
 
 #include <X11/Xlib.h>
+
+#include "dbusmenushortcut_p.h"
 
 
 #ifndef NDEBUG
@@ -51,7 +54,7 @@ void file_logger(QtMsgType type, const char *msg){
 void inspect(const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int> &menuMap){
 	QString label;
 	for(const DBusMenuLayoutItem &item : topItem.children){
-        label = item.properties.value("label").toString().remove("_");
+		label = item.properties.value("label").toString().remove("_");
 		if(!item.children.isEmpty()){
 			QString subPath(path);
 			subPath.append(label);
@@ -59,8 +62,13 @@ void inspect(const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int>
 			inspect(item, subPath, menuMap);
 		}else{
 			if(!label.isEmpty()){
+				QString str = path + label;
+				if(item.properties.contains(QString("shortcut"))){
+					DBusMenuShortcut s = qdbus_cast<DBusMenuShortcut>(item.properties.value("shortcut").value<QDBusArgument>());
+					str += "   " + s.toKeySequence().toString();
+				}
 				//qDebug() << path << label << " ::: " << item.id;
-				menuMap.insert(path + label, item.id);
+				menuMap.insert(str, item.id);
 			}
 		}
 	}
