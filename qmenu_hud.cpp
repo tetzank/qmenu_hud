@@ -62,7 +62,7 @@ void inspect(const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int>
 			inspect(item, subPath, menuMap);
 		}else{
 			if(!label.isEmpty()){
-				QString str = path + label;
+				QString str = QString("%1").arg(path + label, -150); //FIXME: width hardcoded
 				if(item.properties.contains(QString("shortcut"))){
 					DBusMenuShortcut s = qdbus_cast<DBusMenuShortcut>(item.properties.value("shortcut").value<QDBusArgument>());
 					str += "   " + s.toKeySequence().toString();
