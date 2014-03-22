@@ -14,11 +14,19 @@ project(qmenu_hud)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt4 COMPONENTS QTCORE QTGUI QTDBUS)
+find_package(Qt4 REQUIRED COMPONENTS QTCORE QTGUI QTDBUS)
 find_package(X11 REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(DBUSMENUQT REQUIRED dbusmenu-qt>=0.6.0)
+
+find_program(DMENU_PATH dmenu)
+if(NOT DMENU_PATH)
+	message(STATUS "Couldn't find dmenu. Using plain \"dmenu\" which needs to be in PATH.")
+	set(DMENU_PATH "dmenu" CACHE FILEPATH "" FORCE)
+endif(NOT DMENU_PATH)
+
+configure_file(${CMAKE_SOURCE_DIR}/projectConfig.h.in ${CMAKE_BINARY_DIR}/projectConfig.h)
 
 include_directories(
    ${CMAKE_SOURCE_DIR}
@@ -58,6 +66,6 @@ set(qmenu_registrar_SRCS qmenu_registrar.cpp registrar.cpp
 qt4_add_dbus_adaptor(qmenu_registrar_SRCS ${appmenu_xml} registrar.h Registrar)
 
 add_executable(qmenu_registrar ${qmenu_registrar_SRCS})
-target_link_libraries(qmenu_registrar ${DBUSMENUQT_LIBRARIES} ${QT_LIBRARIES} ${X11_LIBRARIES})
+target_link_libraries(qmenu_registrar ${DBUSMENUQT_LIBRARIES} ${QT_LIBRARIES})
 
 install(TARGETS qmenu_hud qmenu_registrar DESTINATION bin)

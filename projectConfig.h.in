@@ -1,0 +1,7 @@
+// processed by cmake
+#ifndef PROJECT_CONFIG_H
+#define PROJECT_CONFIG_H
+
+#define DMENU_PATH "@DMENU_PATH@"
+
+#endif
