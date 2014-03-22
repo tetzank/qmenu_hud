@@ -1,4 +1,5 @@
-#include <cstdlib> // strtol
+#include <iostream>
+#include <cstdio> //perror
 
 #include <QApplication>
 #include <QtDebug>
@@ -81,19 +82,22 @@ int main(int argc, char **argv){
 #endif
 
 	unsigned long int winID;
-	if(argc == 2){ //TODO: print usage with -h|--help
-		// got window id as argument
-		errno = 0;
-		if(argv[1][0] == '0' && argv[1][1] == 'x'){
-			// win id in hex
-			winID = strtol(argv[1], NULL, 16);
-		}else{
-			// win id in dec, hopefully
-			winID = strtol(argv[1], NULL, 10);
+	if(argc == 2){
+		QString arg(argv[1]);
+		if(arg == "-h" || arg == "--help"){
+			std::cout << "usage: qmenu_hud [window id]" << std::endl
+				<< std::endl
+				<< "If no window id is specified, the window which has currently the focus is used." << std::endl
+				<< "qmenu_registrar needs to be running." << std::endl;
+			return 0;
 		}
-		if(errno != 0){
-			perror("strtol failed");  //FIXME: write into log
-			exit(EXIT_FAILURE);
+
+		// got window id as argument
+		bool ok;
+		winID = arg.toULong(&ok, 0);
+		if(!ok){
+			std::cerr << "couldn't convert to window id: " << argv[1] << std::endl;
+			return -1;
 		}
 	}else{
 		// get window (id) which has currently the focus
