@@ -1,0 +1,50 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+                      "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<!-- GDBus 2.46.1 -->
+<node>
+  <interface name="org.gtk.Actions">
+    <method name="List">
+      <arg type="as" name="list" direction="out">
+      </arg>
+    </method>
+    <method name="Describe">
+      <arg type="s" name="action_name" direction="in">
+      </arg>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="GtkMenuDesc"/>
+      <arg type="(bgav)" name="description" direction="out">
+      </arg>
+    </method>
+    <method name="DescribeAll">
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="GtkMenuDescMap"/>
+      <arg type="a{s(bgav)}" name="descriptions" direction="out">
+      </arg>
+    </method>
+    <method name="Activate">
+      <arg type="s" name="action_name" direction="in">
+      </arg>
+      <arg type="av" name="parameter" direction="in">
+      </arg>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.In2" value="SillyMap"/>
+      <arg type="a{sv}" name="platform_data" direction="in">
+      </arg>
+    </method>
+<!--    <method name="SetState">
+      <arg type="s" name="action_name" direction="in">
+      </arg>
+      <arg type="v" name="value" direction="in">
+      </arg>
+      <arg type="a{sv}" name="platform_data" direction="in">
+      </arg>
+    </method>
+    <signal name="Changed">
+      <arg type="as" name="removals">
+      </arg>
+      <arg type="a{sb}" name="enable_changes">
+      </arg>
+      <arg type="a{sv}" name="state_changes">
+      </arg>
+      <arg type="a{s(bgav)}" name="additions">
+      </arg>
+	</signal>-->
+  </interface>
+</node>

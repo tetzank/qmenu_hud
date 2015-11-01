@@ -44,7 +44,7 @@ include(${QT_USE_FILE})
 
 # use krunner method, rips code from libdbusmenu-qt
 
-set(qmenu_hud_SRCS qmenu_hud.cpp dbusmenutypes_p.cpp dbusmenushortcut_p.cpp)
+set(qmenu_hud_SRCS qmenu_hud.cpp dbusmenutypes_p.cpp dbusmenushortcut_p.cpp gtkmenutypes.cpp)
 
 set(appmenu_xml com.canonical.AppMenu.Registrar.xml)
 set_source_files_properties(${appmenu_xml} PROPERTIES INCLUDE "dbusmenutypes_p.h")
@@ -53,6 +53,13 @@ qt4_add_dbus_interface(qmenu_hud_SRCS ${appmenu_xml} app_menu)
 set(dbusmenu_xml com.canonical.dbusmenu.xml)
 set_source_files_properties(${dbusmenu_xml} PROPERTIES INCLUDE "dbusmenutypes_p.h")
 qt4_add_dbus_interface(qmenu_hud_SRCS ${dbusmenu_xml} dbus_menu)
+
+set(gtk_action_xml org.gtk.Actions.xml)
+set_source_files_properties(${gtk_action_xml} PROPERTIES INCLUDE "gtkmenutypes.h")
+qt4_add_dbus_interface(qmenu_hud_SRCS ${gtk_action_xml} gtk_action)
+set(gtk_menu_xml org.gtk.Menus.xml)
+set_source_files_properties(${gtk_menu_xml} PROPERTIES INCLUDE "gtkmenutypes.h")
+qt4_add_dbus_interface(qmenu_hud_SRCS ${gtk_menu_xml} gtk_menu)
 
 add_executable(qmenu_hud ${qmenu_hud_SRCS})
 # only link against qtcore and qt dbus lib

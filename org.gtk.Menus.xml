@@ -1,0 +1,22 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+                      "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<!-- GDBus 2.46.1 -->
+<node>
+  <interface name="org.gtk.Menus">
+    <method name="Start">
+      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="SillyList"/>
+      <arg type="au" name="groups" direction="in">
+      </arg>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="GtkMenuEntryList"/>
+      <arg type="a(uuaa{sv})" name="content" direction="out">
+      </arg>
+    </method>
+<!--    <method name="End">
+      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="SillyList"/>
+      <arg type="au" name="groups" direction="in">
+      </arg>
+    </method>
+    <signal name="Changed">
+    </signal>-->
+  </interface>
+</node>
