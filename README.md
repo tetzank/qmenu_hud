@@ -37,10 +37,8 @@ Usage
 
 It was only tested under Awesome WM on Arch Linux with KDE applications. To
 enable it for KDE4 applications, install appmenu-qt. Set a global keyboard
-shortcut for qmenu_hud. Now you have to start the registrar dbus service. There
-are two ways of doing this: Run qmenu_registrar or use the kded module
-'appmenu'. qmenu_registrar is recommended as the kded module crashes when you
-try to get the menu of a window which isn't exporting its menu.
+shortcut for qmenu_hud. Now you have to start the registrar dbus service by
+executing qmenu_registrar. 
 
 Just run qmenu_registrar before any gui application when starting up, e.g.
 .xinitrc:
@@ -51,19 +49,40 @@ konsole &
 exec awesome
 ```
 
-To use the kded module 'appmenu' just change some settings in System Settings:
+All menubars should now be hidden and you can press the global shortcut to
+start qmenu_hud and get a searchable list of all menu entries.
 
-https://wiki.archlinux.org/index.php/Kde#Adding_a_Global_Menu_to_the_desktop
-> To export the menus to your global menu, go to
-> *System Settings > Application Appearance > Style*.
-> Now click the fine-tuning tab and use the drop-down list to select *only
-> export* as your menubar style.
+Experimental GTK support
+------------------------
 
-You can also start it by hand (kded needs to be running):
+Appmenu isn't used by GTK anymore. The Unity GTK module has its own dbus
+interface, which is an implementation detail and can break any minute.
+Experimental support for this was now added. Be happy if it works.
+
+Install the Unity GTK module, AUR:
+https://aur.archlinux.org/packages/unity-gtk-module-standalone-bzr/
+
+Start a GTK application and press the qmenu_hud shortcut, e.g. gimp:
 ```
-$ dbus-send --type=method_call --print-reply --dest=org.kde.kded /kded org.kde.kded.loadModule string:appmenu
+GTK_MODULES="unity-gtk-module" gimp
 ```
 
-Either way, all menubars should now be hidden and you can press the global
-shortcut to start qmenu_hud and get a searchable list of all menu entries.
+Add this change to GTK_MODULES to .profile or .xinitrc.
+```
+if [ -n "$GTK_MODULES" ]; then
+    GTK_MODULES="${GTK_MODULES}:unity-gtk-module"
+else
+    GTK_MODULES="unity-gtk-module"
+fi
 
+if [ -z "$UBUNTU_MENUPROXY" ]; then
+    UBUNTU_MENUPROXY=1
+fi
+```
+The AUR package does this for you. Just log out and back in.
+
+Similar project
+----------------
+
+i3-hud-menu:
+https://github.com/RafaelBocquet/i3-hud-menu
