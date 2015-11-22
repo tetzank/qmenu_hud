@@ -336,6 +336,7 @@ int main(int argc, char **argv){
 		// oh so much fun... thx gtk
 		window = XDefaultRootWindow(display);
 		Atom property = XInternAtom(display, "_NET_ACTIVE_WINDOW", True);
+		if(property==None) return -1;
 		Atom actual_type_return;
 		int actual_format_return;
 		unsigned long nitems_return, bytes_after_return;
@@ -349,21 +350,23 @@ int main(int argc, char **argv){
 	}
 
 	//FIXME: error check
+	unsigned char *dbusname=nullptr, *menubarpath=nullptr;
 	Atom property = XInternAtom(display, "_GTK_UNIQUE_BUS_NAME", True);
-	Atom actual_type_return;
-	int actual_format_return;
-	unsigned long nitems_return, bytes_after_return;
-	unsigned char *dbusname, *menubarpath;
-	XGetWindowProperty(
-		display, winID, property, 0, 1024, False, AnyPropertyType,
-		&actual_type_return, &actual_format_return, &nitems_return, &bytes_after_return, &dbusname
-	);
+	if(property != None){
+		Atom actual_type_return;
+		int actual_format_return;
+		unsigned long nitems_return, bytes_after_return;
+		XGetWindowProperty(
+			display, winID, property, 0, 1024, False, AnyPropertyType,
+			&actual_type_return, &actual_format_return, &nitems_return, &bytes_after_return, &dbusname
+		);
 
-	property = XInternAtom(display, "_GTK_MENUBAR_OBJECT_PATH", True);
-	XGetWindowProperty(
-		display, winID, property, 0, 1024, False, AnyPropertyType,
-		&actual_type_return, &actual_format_return, &nitems_return, &bytes_after_return, &menubarpath
-	);
+		property = XInternAtom(display, "_GTK_MENUBAR_OBJECT_PATH", True);
+		XGetWindowProperty(
+			display, winID, property, 0, 1024, False, AnyPropertyType,
+			&actual_type_return, &actual_format_return, &nitems_return, &bytes_after_return, &menubarpath
+		);
+	}
 
 	if(dbusname && menubarpath){
 // 		qDebug() << "dbusname: " << dbusname << "; path: " << menubarpath;
