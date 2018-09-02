@@ -60,31 +60,19 @@ start qmenu_hud and get a searchable list of all menu entries.
 Experimental GTK support
 ------------------------
 
-Appmenu isn't used by GTK anymore. The Unity GTK module has its own dbus
-interface, which is an implementation detail and can break any minute.
-Experimental support for this was now added. Be happy if it works.
+Experimental support for GTK was added. Be happy if it works.
 
-Install the Unity GTK module, AUR:
-https://aur.archlinux.org/packages/unity-gtk-module-standalone-bzr/
+On Arch, install the package appmenu-gtk-module.
 
 Start a GTK application and press the qmenu_hud shortcut, e.g. gimp:
 ```
-GTK_MODULES="unity-gtk-module" gimp
+GTK_MODULES="appmenu-gtk-module" gimp
 ```
 
-Add this change to GTK_MODULES to .profile or .xinitrc.
+The package provides a configuration file. Include it in .xinitrc:
 ```
-if [ -n "$GTK_MODULES" ]; then
-    GTK_MODULES="${GTK_MODULES}:unity-gtk-module"
-else
-    GTK_MODULES="unity-gtk-module"
-fi
-
-if [ -z "$UBUNTU_MENUPROXY" ]; then
-    UBUNTU_MENUPROXY=1
-fi
+source /etc/X11/xinit/xinitrc.d/80-appmenu-gtk-module
 ```
-The AUR package does this for you. Just log out and back in.
 
 
 Similar project
