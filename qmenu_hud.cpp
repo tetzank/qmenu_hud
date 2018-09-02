@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdio> //perror
 
-#include <QApplication>
+#include <QCoreApplication>
 #include <QtDebug>
 #include <QKeySequence>
 
@@ -33,6 +33,7 @@ typedef org::gtk::Menus GtkMenu;
 #include "dbusmenushortcut_p.h"
 
 
+#if 0
 #ifndef NDEBUG
 void file_logger(QtMsgType type, const char *msg){
 	QString txt;
@@ -59,6 +60,7 @@ void file_logger(QtMsgType type, const char *msg){
 #else
 void devnull_logger(QtMsgType type, const char *msg){
 }
+#endif
 #endif
 
 
@@ -87,7 +89,7 @@ void inspect(const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int>
 }
 
 void gtk(unsigned char *dbusname, unsigned char *menubarpath){
-	// gtk changed it's model to something else, doing everything again is always fun...
+	// gtk changed its model to something else, doing everything again is always fun...
 	// even worse: the dbus interface is an implementation detail and can change any minute, fun as hell
 	GtkMenuTypes_register();
 
@@ -293,12 +295,14 @@ void appmenu(unsigned long int winID){
 
 int main(int argc, char **argv){
 	QCoreApplication app(argc, argv);
+#if 0
 #ifndef NDEBUG
 	qInstallMsgHandler(file_logger);
 #else
 	//HACK: get rid of QDBusSignature: invalid signature ""
 	//      probably a bad idea
 	qInstallMsgHandler(devnull_logger);
+#endif
 #endif
 
 	unsigned long int winID;

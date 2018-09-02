@@ -11,8 +11,8 @@ Currently it just runs dmenu with the menu entries obtained from dbus.
 Dependencies
 ------------
 
-- Qt4
-- libdbusmenu-qt
+- Qt5 (core, gui, dbus)
+- libdbusmenu-qt5
 - dmenu
 
 
@@ -32,15 +32,19 @@ dbus service where other programs which export their menus have to register.
 qmenu_hud shows all menu entries of the focused window in a searchable list
 using dmenu.
 
+
 Usage
 -----
 
-It was only tested under Awesome WM on Arch Linux with KDE applications. To
-enable it for KDE4 applications, install appmenu-qt. Set a global keyboard
-shortcut for qmenu_hud. Now you have to start the registrar dbus service by
-executing qmenu_registrar. 
+It was tested under Awesome WM on Arch Linux mostly with KDE applications. To
+enable it for KDE4 applications, install appmenu-qt4. It works out-of-the-box
+in KDE5/Qt5 applications. appmenu-qt5 breaks it.
 
-Just run qmenu_registrar before any gui application when starting up, e.g.
+Set a global keyboard shortcut for qmenu_hud. Refer to the documentation of
+your WM or DE how to do that. Now you have to start the registrar dbus service
+by executing qmenu_registrar.
+
+You can add qmenu_registrar to the startup of the graphical environment, e.g.
 .xinitrc:
 ```
 qmenu_registrar &
@@ -51,6 +55,7 @@ exec awesome
 
 All menubars should now be hidden and you can press the global shortcut to
 start qmenu_hud and get a searchable list of all menu entries.
+
 
 Experimental GTK support
 ------------------------
@@ -80,6 +85,7 @@ if [ -z "$UBUNTU_MENUPROXY" ]; then
 fi
 ```
 The AUR package does this for you. Just log out and back in.
+
 
 Similar project
 ----------------

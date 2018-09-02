@@ -1,5 +1,5 @@
 
-#include <QApplication>
+#include <QCoreApplication>
 #include <QtDebug>
 
 #include "registrar.h"
