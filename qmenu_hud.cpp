@@ -76,10 +76,34 @@ void inspect(const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int>
 		}else{
 			// leaf
 			if(!label.isEmpty()){
+				//qDebug() << item.properties << '\n';
 				QString str = QString("%1").arg(path + label, -150); //FIXME: width hardcoded
+				if(item.properties.contains(QString("toggle-state"))
+					&& item.properties.contains(QString("toggle-type"))
+				){
+					QString toggle_type = item.properties.value("toggle-type").toString();
+					if(toggle_type == "checkmark"){
+						if(item.properties.value("toggle-state").toInt() == 1){
+							str += "[x]";
+						}else{
+							str += "[ ]";
+						}
+					}else if(toggle_type == "radio"){
+						if(item.properties.value("toggle-state").toInt() == 1){
+							str += "(o)";
+						}else{
+							str += "( )";
+						}
+					}else{
+						qDebug() << "unknown toggle type: " << toggle_type;
+						str += "{?}";
+					}
+				}else{
+					str += "   ";
+				}
 				if(item.properties.contains(QString("shortcut"))){
 					DBusMenuShortcut s = qdbus_cast<DBusMenuShortcut>(item.properties.value("shortcut").value<QDBusArgument>());
-					str += "   " + s.toKeySequence().toString();
+					str += " " + s.toKeySequence().toString();
 				}
 				//qDebug() << path << label << " ::: " << item.id;
 				menuMap.insert(str, item.id);
