@@ -64,7 +64,7 @@ void devnull_logger(QtMsgType type, const char *msg){
 #endif
 
 
-void inspect(const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int> &menuMap){
+void inspect(int width, const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int> &menuMap){
 	QString label;
 	for(const DBusMenuLayoutItem &item : topItem.children){
 		label = item.properties.value("label").toString().remove("_");
@@ -72,12 +72,12 @@ void inspect(const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int>
 			QString subPath(path);
 			subPath.append(label);
 			subPath.append(" > ");
-			inspect(item, subPath, menuMap);
+			inspect(width, item, subPath, menuMap);
 		}else{
 			// leaf
 			if(!label.isEmpty()){
 				//qDebug() << item.properties << '\n';
-				QString str = QString("%1").arg(path + label, -150); //FIXME: width hardcoded
+				QString str = QString("%1").arg(path + label, -width);
 				if(item.properties.contains(QString("toggle-state"))
 					&& item.properties.contains(QString("toggle-type"))
 				){
@@ -112,7 +112,7 @@ void inspect(const DBusMenuLayoutItem &topItem, QString &path, QMap<QString,int>
 	}
 }
 
-void gtk(unsigned char *dbusname, unsigned char *menubarpath){
+void gtk(unsigned char *dbusname, unsigned char *menubarpath, int lines){
 	// gtk changed its model to something else, doing everything again is always fun...
 	// even worse: the dbus interface is an implementation detail and can change any minute, fun as hell
 	GtkMenuTypes_register();
@@ -196,7 +196,7 @@ void gtk(unsigned char *dbusname, unsigned char *menubarpath){
 
 	// call dmenu -i -l 20
 	QStringList args;
-	args << "-i" << "-l" << "20";
+	args << "-i" << "-l" << QString::number(lines);
 	QProcess *proc = new QProcess();
 	proc->start(DMENU_PATH, args);
 	proc->waitForStarted();
@@ -227,7 +227,7 @@ void gtk(unsigned char *dbusname, unsigned char *menubarpath){
 	delete gtkAction;
 }
 
-void appmenu(unsigned long int winID){
+void appmenu(unsigned long int winID, int lines, int width){
 	DBusMenuTypes_register();
 
 	// get dbus service of the application which exports menu
@@ -275,14 +275,14 @@ void appmenu(unsigned long int winID){
 		path.append(topLevel.properties.value("label").toString().remove("_"));
 		path.append(" > ");
 
-		inspect(topLevel, path, menuMap);
+		inspect(width, topLevel, path, menuMap);
 
 		path.clear();
 	}
 
 	// call dmenu -i -l 20
 	QStringList args;
-	args << "-i" << "-l" << "20";
+	args << "-i" << "-l" << QString::number(lines);
 	QProcess *proc = new QProcess();
 	proc->start(DMENU_PATH, args);
 	proc->waitForStarted();
@@ -329,23 +329,45 @@ int main(int argc, char **argv){
 #endif
 #endif
 
+	// handle arguments
+	QCommandLineParser parser;
+	parser.setApplicationDescription("menu search program");
+	parser.addHelpOption();
+	parser.addOptions({
+		{"l", "number of lines in dmenu, default: 20", "lines"},
+		{"w", "width of menu entries, default: 150", "width"},
+		{"i", "window id, default: get currently focused window", "winid"}
+	});
+	parser.process(app);
+
+	int lines=20, width=150;
+	if(parser.isSet("l")){
+		bool ok;
+		lines = parser.value("l").toInt(&ok);
+		if(!ok){
+			qDebug() << "couldn't convert number of lines: " << parser.value("l");
+			return -1;
+		}
+	}
+	if(parser.isSet("w")){
+		bool ok;
+		width = parser.value("w").toInt(&ok);
+		if(!ok){
+			qDebug() << "couldn't convert width: " << parser.value("w");
+			return -1;
+		}
+	}
+	//std::cout << "lines: " << lines << "\nwidth: " << width << '\n';
+
 	unsigned long int winID;
 	Display *display = XOpenDisplay(NULL);
-	if(argc == 2){
-		QString arg(argv[1]);
-		if(arg == "-h" || arg == "--help"){
-			std::cout << "usage: qmenu_hud [window id]" << std::endl
-				<< std::endl
-				<< "If no window id is specified, the window which has currently the focus is used." << std::endl
-				<< "qmenu_registrar needs to be running." << std::endl;
-			return 0;
-		}
-
+	if(parser.isSet("i")){
 		// got window id as argument
 		bool ok;
-		winID = arg.toULong(&ok, 0);
+		//winID = arg.toULong(&ok, 0);
+		winID = parser.value("i").toULong(&ok, 0);
 		if(!ok){
-			std::cerr << "couldn't convert to window id: " << argv[1] << std::endl;
+			qDebug() << "couldn't convert window id: " << parser.value("i");
 			return -1;
 		}
 	}else{
@@ -398,12 +420,12 @@ int main(int argc, char **argv){
 
 	if(dbusname && menubarpath){
 // 		qDebug() << "dbusname: " << dbusname << "; path: " << menubarpath;
-		gtk(dbusname, menubarpath);
+		gtk(dbusname, menubarpath, lines);
 
 		XFree(dbusname);
 		XFree(menubarpath);
 	}else{
-		appmenu(winID);
+		appmenu(winID, lines, width);
 	}
 
 	XCloseDisplay(display);
