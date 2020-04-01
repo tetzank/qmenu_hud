@@ -11,6 +11,7 @@ Currently it just runs dmenu with the menu entries obtained from dbus.
 Dependencies
 ------------
 
+- cmake
 - Qt5 (core, gui, dbus)
 - libdbusmenu-qt5
 - dmenu
@@ -21,6 +22,7 @@ Compile
 
 ```
 $ mkdir build
+$ cd build
 $ cmake ..
 $ make
 ```
