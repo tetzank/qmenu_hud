@@ -12,8 +12,8 @@ Dependencies
 ------------
 
 - cmake
-- Qt5 (core, gui, dbus)
-- libdbusmenu-qt5
+- Qt6 (core, gui, dbus)
+- libdbusmenu-qt6
 - dmenu
 
 
